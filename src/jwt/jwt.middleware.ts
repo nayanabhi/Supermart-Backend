@@ -11,13 +11,15 @@ export class JwtMiddleware implements NestMiddleware {
     if (token) {
       try {
         const decodedToken = this.jwtService.verify(token, {secret: process.env.JWT_SECRET});
-        req['user'] = decodedToken; 
+        req['user'] = decodedToken;
         next(); 
       } catch (error) {
+        
         console.error('Error occurred while verifying token:', error);
         res.status(401).json({ message: 'Unauthorized' }); // Return 401 Unauthorized if token verification fails
       }
     } else {
+      
       res.status(401).json({ message: 'Unauthorized' }); // Return 401 Unauthorized if no token is provided
     }
   }

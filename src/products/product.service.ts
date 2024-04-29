@@ -15,6 +15,10 @@ export class ProductService {
     return await this.productRepository.findOne({where: {id}});
   }
 
+  async getAllProducts(): Promise<Product[]> {
+    return await this.productRepository.find();
+  }
+
   async createProduct(product: Products): Promise<Product> {
     const newProduct = new Product();
     Object.assign(newProduct, product);
