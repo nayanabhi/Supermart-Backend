@@ -6,6 +6,7 @@ import { Repository, Not, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ProductSellerMapping } from 'src/schema/productSellerMapping.entity';
 import { Product } from 'src/schema/product.entity';
+import { AnyARecord } from 'dns';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +22,23 @@ export class UsersService {
   async getUserById(id: number): Promise<User> {
     return await this.userRepository.findOne({ where: { id } });
   }
+
+  async getProductSellerEntry(userId: number, productId): Promise<ProductSellerMapping> {
+    return await this.productSellerRepository.findOne({ where: { userId, productId } });
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { email } });
+  }
+
+  async updatePassword(email: string, password: string): Promise<User> {
+    const user = await this.getUserByEmail(email);
+    const salt = await bcrypt.genSalt();
+    console.log({434234: password, salt})
+    password = await bcrypt.hash(password, salt);
+    Object.assign(user, {password});
+    return await this.userRepository.save(user);
+  }
   async findUserByUsername(username: string): Promise<User> {
     return await this.userRepository.findOne({ where: { username } });
   }
@@ -34,7 +52,11 @@ export class UsersService {
     return await this.userRepository.save(newUser);
   }
 
-  async updateUser(id: number, updateUser: Users): Promise<User> {
+  async getAllUser(): Promise<User[]> {
+    return await this.userRepository.find();
+  }
+
+  async updateUser(id: number, updateUser: any): Promise<User> {
     const user = await this.getUserById(id);
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -72,23 +94,65 @@ export class UsersService {
     return await this.productSellerRepository.delete({productId, userId});
   }
 
-  async getSelectedProducts(userId) {
-    const products = await this.productRepository
-      .createQueryBuilder('product')
-      .innerJoin(ProductSellerMapping, 'mapping', 'mapping.productId = product.id')
-      .innerJoin(User, 'user', 'user.id = mapping.userId')
-      .where('user.id = :userId', { userId })
-      .getMany();
-    return products;
+  async updateProductStatus(productId: number, userId, isAvailable: boolean, price) {
+    const updateProductSeller = {
+      available: isAvailable,
+      price
+    }
+    const productSellerEntry = await this.getProductSellerEntry(userId, productId);
+    if (!productSellerEntry) {
+      throw new HttpException('Product seller not found', HttpStatus.NOT_FOUND);
+    }
+    Object.assign(productSellerEntry, updateProductSeller);
+    return await this.productSellerRepository.save(productSellerEntry);
   }
 
-  async getUnselectedProducts(userId) {
-    const selectedProducts = await this.getSelectedProducts(userId);
-    const selectedIds = selectedProducts.map(item => item.id);
-    return this.productRepository.find({
-      where: {
-        id: Not(In(selectedIds)),
-      },
-    });
+  async getSelectedProducts(userId, searchText) {
+    if(searchText != '') {
+        const products = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin(ProductSellerMapping, 'mapping', 'mapping.productId = product.id')
+        .innerJoin(User, 'user', 'user.id = mapping.userId')
+        .where('user.id = :userId', { userId })
+        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `${searchText}%` })
+        .getMany();
+      return products;
+    }else {
+        const products = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin(ProductSellerMapping, 'mapping', 'mapping.productId = product.id')
+        .innerJoin(User, 'user', 'user.id = mapping.userId')
+        .where('user.id = :userId', { userId })
+        .getMany();
+      return products;
+    }
+    
+  }
+
+  async getUnselectedProducts(userId, searchText: string) {
+    if(searchText != '') {
+      const selectedProducts = await this.getSelectedProducts(userId, "");
+      const selectedIds = selectedProducts.map(item => item.id);
+      return this.productRepository
+        .createQueryBuilder('product')
+        .where('product.id NOT IN (:...selectedIds)', { selectedIds })
+        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `${searchText}%` })
+        .getMany();
+    }else {
+      const selectedProducts = await this.getSelectedProducts(userId, "");
+      const selectedIds = selectedProducts.map(item => item.id);
+
+      if (selectedIds.length === 0) {
+        return this.productRepository
+          .createQueryBuilder('product')
+          .getMany();
+      } else {
+        return this.productRepository
+          .createQueryBuilder('product')
+          .where('product.id NOT IN (:...selectedIds)', { selectedIds: selectedIds })
+          .getMany();
+      }
+    }
+    
   }
 }

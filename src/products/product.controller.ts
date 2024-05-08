@@ -1,7 +1,7 @@
 import { Products } from '../dto/product.dto';
 import { ProductService } from './product.service';
 import { Product } from '../schema/product.entity';
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
 
 
 @Controller("products")
@@ -9,8 +9,8 @@ export class ProductsController {
   constructor(private readonly productService: ProductService) {}
 
   @Get("/all")
-  async getAllProducts(): Promise<Product[]> {
-    return this.productService.getAllProducts();
+  async getAllProducts(@Query('searchText') searchText): Promise<Product[]> {
+    return this.productService.getAllProducts(searchText);
   }
 
   @Get("/:id")

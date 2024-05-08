@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '@nestjs/jwt';
 
@@ -14,13 +14,18 @@ export class JwtMiddleware implements NestMiddleware {
         req['user'] = decodedToken;
         next(); 
       } catch (error) {
-        
-        console.error('Error occurred while verifying token:', error);
-        res.status(401).json({ message: 'Unauthorized' }); // Return 401 Unauthorized if token verification fails
+        if (error.name === 'TokenExpiredError') {
+            throw new HttpException(error.name, HttpStatus.UNAUTHORIZED);
+        }else {
+          throw new HttpException("TokenExpiredError", HttpStatus.UNAUTHORIZED);
+          console.error('Error occurred while verifying token:', error);
+          res.status(401).json({ message: 'Unauthorized' }); // Return 401 Unauthorized if token verification fails
+        }
       }
     } else {
       
-      res.status(401).json({ message: 'Unauthorized' }); // Return 401 Unauthorized if no token is provided
+      throw new HttpException('TokenExpiredError', HttpStatus.UNAUTHORIZED);
+      // res.status(401).json({ message: 'Unauthorized' }); // Return 401 Unauthorized if no token is provided
     }
   }
 }

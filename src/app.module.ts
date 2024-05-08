@@ -33,6 +33,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(CorsMiddleware).forRoutes('*'); // Apply CORS middleware to all routes
     consumer.apply(JwtMiddleware).exclude({ path: '/auth/(.*)', method: RequestMethod.ALL },
-    { path: '/users/createUser', method: RequestMethod.POST }, { path: '/sellers/createSeller', method: RequestMethod.POST }).forRoutes('*'); // Apply JwtMiddleware to all routes
+    { path: '/users/createUser', method: RequestMethod.POST }, { path: '/users/updatePassword', method: RequestMethod.POST }, { path: '/sellers/createSeller', method: RequestMethod.POST }).forRoutes('*'); // Apply JwtMiddleware to all routes
   }
 }

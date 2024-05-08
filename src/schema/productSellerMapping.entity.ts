@@ -32,9 +32,9 @@ export class ProductSellerMapping {
   @JoinColumn({ name: 'sellerId' })
   seller: Seller;
 
-  @Column(Optional)
+  @Column({nullable: true})
   price: number;
 
-  @Column({ default: true })
+  @Column({ default: false })
   available: boolean;
 }

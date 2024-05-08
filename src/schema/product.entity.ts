@@ -12,4 +12,10 @@ export class Product {
   @Column()
   description: string;
 
+  @Column()
+  weight: string;
+
+  @Column()
+  imageLink: string;
+
 }
