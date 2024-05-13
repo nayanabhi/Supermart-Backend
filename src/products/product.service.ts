@@ -18,7 +18,7 @@ export class ProductService {
   async getAllProducts(searchText): Promise<Product[]> {
     if(searchText != '') {
       return await this.productRepository.createQueryBuilder('product')
-      .where('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `${searchText}%` })
+      .where('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `%${searchText}%` })
       .getMany();
   }else {
     return await this.productRepository.find();

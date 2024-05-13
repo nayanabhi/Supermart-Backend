@@ -87,10 +87,6 @@ export class UsersService {
   }
 
   async removeProduct(productId: number, userId) {
-    // const newProductSellerMapping = new ProductSellerMapping();
-    // newProductSellerMapping.productId = productId;
-    // newProductSellerMapping.userId = userId;
-    // newProductSellerMapping.sellerId = 4;
     return await this.productSellerRepository.delete({productId, userId});
   }
 
@@ -114,7 +110,7 @@ export class UsersService {
         .innerJoin(ProductSellerMapping, 'mapping', 'mapping.productId = product.id')
         .innerJoin(User, 'user', 'user.id = mapping.userId')
         .where('user.id = :userId', { userId })
-        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `${searchText}%` })
+        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `%${searchText}%` })
         .getMany();
       return products;
     }else {
@@ -136,7 +132,7 @@ export class UsersService {
       return this.productRepository
         .createQueryBuilder('product')
         .where('product.id NOT IN (:...selectedIds)', { selectedIds })
-        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `${searchText}%` })
+        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `%${searchText}%` })
         .getMany();
     }else {
       const selectedProducts = await this.getSelectedProducts(userId, "");
