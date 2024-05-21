@@ -10,7 +10,6 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
 import { ProductModule } from './products/product.module';
 import { Products } from './dto/product.dto';
 import { Sellers } from './dto/seller.dto';
-import { SellerModule } from './sellers/seller.module';
 import { CorsMiddleware } from './cors.middleware';
 
 
@@ -23,8 +22,7 @@ import { CorsMiddleware } from './cors.middleware';
     TypeOrmModule.forFeature([Users, Products, Sellers]),
     JwtModule,
     AuthModule,
-    ProductModule,
-    SellerModule
+    ProductModule
   ],
   controllers: [AppController],
   providers: [AppService, JwtService],

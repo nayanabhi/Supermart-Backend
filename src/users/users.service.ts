@@ -82,7 +82,6 @@ export class UsersService {
     const newProductSellerMapping = new ProductSellerMapping();
     newProductSellerMapping.productId = productId;
     newProductSellerMapping.userId = userId;
-    newProductSellerMapping.sellerId = 4;
     return await this.productSellerRepository.save(newProductSellerMapping);
   }
 
