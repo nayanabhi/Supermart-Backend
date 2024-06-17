@@ -71,6 +71,12 @@ export class UsersController {
     const userId = req['user'].sub;
     return this.usersService.removeProduct(+id, userId);
   }
+
+  @Get("getAvailableSellers/:productId")
+  async getAvailableSellers(@Param('productId') productId: string) {
+    return this.usersService.getAvailableSellers(productId);
+  }
+ 
   @Get("selectedProducts") 
   async selectedProducts(@Req() req: Request, @Query() query: any): Promise<Product[]> {
     const userId = req['user'].sub;

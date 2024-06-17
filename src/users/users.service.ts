@@ -89,6 +89,17 @@ export class UsersService {
     return await this.productSellerRepository.delete({productId, userId});
   }
 
+  async getAvailableSellers(productId) {
+    const available = true;
+    const sellers = await this.userRepository
+    .createQueryBuilder('user')
+    .innerJoin(ProductSellerMapping, 'mapping', 'mapping.userId = user.id')
+    .where('mapping.productId = :productId', { productId })
+    .andWhere('mapping.available = :available', { available })
+    .getMany();
+    return sellers;
+  }
+
   async updateProductStatus(productId: number, userId, isAvailable: boolean, price) {
     const updateProductSeller = {
       available: isAvailable,
