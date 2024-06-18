@@ -12,6 +12,11 @@ export class JwtMiddleware implements NestMiddleware {
       try {
         const decodedToken = this.jwtService.verify(token, {secret: process.env.JWT_SECRET});
         req['user'] = decodedToken;
+        if(req.originalUrl == '/products/createProduct') {
+          if(decodedToken.role != 'admin') {
+            throw new HttpException('Unauthorized to access the resource', HttpStatus.UNAUTHORIZED);
+          }
+        }
         next(); 
       } catch (error) {
         if (error.name === 'TokenExpiredError') {

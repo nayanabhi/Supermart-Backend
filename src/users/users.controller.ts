@@ -84,6 +84,24 @@ export class UsersController {
     return this.usersService.getSelectedProducts(userId, searchText);
   }
 
+  @Get("selectedPaginatedProducts") 
+  async selectedPaginatedProducts(@Req() req: Request, @Query() query: any): Promise<Product[]> {
+    const userId = req['user'].sub;
+    const searchText = query?.searchText || "";
+    const page = query?.page;
+    const rows = query?.rows;
+    return this.usersService.getSelectedPaginatedProducts(userId, searchText, page, rows);
+  }
+
+  @Get("unSelectedPaginatedProducts") 
+  async unSelectedPaginatedProducts(@Req() req: Request, @Query() query: any): Promise<Product[]> {
+    const userId = req['user'].sub;
+    const searchText = query?.searchText || "";
+    const page = query?.page;
+    const rows = query?.rows;
+    return this.usersService.getUnselectedPaginatedProducts(userId, searchText, page, rows);
+  }
+
   @Get("unSelectedProducts") 
   async unSelectedProducts(@Req() req: Request, @Query() query: any): Promise<Product[]> {
     const userId = req['user'].sub;

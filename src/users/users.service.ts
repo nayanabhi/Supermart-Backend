@@ -135,6 +135,35 @@ export class UsersService {
     
   }
 
+
+  async getSelectedPaginatedProducts(userId, searchText, page, rows) {
+    if(searchText != '') {
+        const products = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin(ProductSellerMapping, 'mapping', 'mapping.productId = product.id')
+        .innerJoin(User, 'user', 'user.id = mapping.userId')
+        .where('user.id = :userId', { userId })
+        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `%${searchText}%` })
+        .skip(page * rows)
+        .take(rows)
+        .orderBy('product.id', 'ASC')
+        .getMany();
+      return products;
+    }else {
+        const products = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin(ProductSellerMapping, 'mapping', 'mapping.productId = product.id')
+        .innerJoin(User, 'user', 'user.id = mapping.userId')
+        .where('user.id = :userId', { userId })
+        .skip(page * rows)
+        .take(rows)
+        .orderBy('product.id', 'ASC')
+        .getMany();
+      return products;
+    }
+    
+  }
+
   async getUnselectedProducts(userId, searchText: string) {
     if(searchText != '') {
       const selectedProducts = await this.getSelectedProducts(userId, "");
@@ -156,6 +185,44 @@ export class UsersService {
         return this.productRepository
           .createQueryBuilder('product')
           .where('product.id NOT IN (:...selectedIds)', { selectedIds: selectedIds })
+          .getMany();
+      }
+    }
+    
+  }
+
+
+
+  async getUnselectedPaginatedProducts(userId, searchText: string, page, rows) {
+    if(searchText != '') {
+      const selectedProducts = await this.getSelectedProducts(userId, "");
+      const selectedIds = selectedProducts.map(item => item.id);
+      return this.productRepository
+        .createQueryBuilder('product')
+        .where('product.id NOT IN (:...selectedIds)', { selectedIds })
+        .andWhere('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `%${searchText}%` })
+        .skip(page * rows)
+        .take(rows)
+        .orderBy('product.id', 'ASC')
+        .getMany();
+    }else {
+      const selectedProducts = await this.getSelectedProducts(userId, "");
+      const selectedIds = selectedProducts.map(item => item.id);
+
+      if (selectedIds.length === 0) {
+        return this.productRepository
+          .createQueryBuilder('product')
+          .skip(page * rows)
+          .take(rows)
+          .orderBy('product.id', 'ASC')
+          .getMany();
+      } else {
+        return this.productRepository
+          .createQueryBuilder('product')
+          .where('product.id NOT IN (:...selectedIds)', { selectedIds: selectedIds })
+          .skip(page * rows)
+          .take(rows)
+          .orderBy('product.id', 'ASC')
           .getMany();
       }
     }

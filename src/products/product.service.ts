@@ -26,6 +26,25 @@ export class ProductService {
     
   }
 
+
+  async getAllPaginatedProducts(searchText, page, rows): Promise<Product[]> {
+    if(searchText != '') {
+      return await this.productRepository.createQueryBuilder('product')
+      .where('LOWER(product.name) LIKE LOWER(:searchText)', { searchText: `%${searchText}%` })
+      .skip(page * rows)
+      .take(rows)
+      .orderBy('product.id', 'ASC')
+      .getMany();
+  }else {
+    return await this.productRepository.createQueryBuilder('product')
+      .skip(page * rows)
+      .take(rows)
+      .orderBy('product.id', 'ASC')
+      .getMany();
+  }
+    
+  }
+
   async createProduct(product: Products): Promise<Product> {
     const newProduct = new Product();
     Object.assign(newProduct, product);

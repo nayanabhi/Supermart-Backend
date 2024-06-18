@@ -13,6 +13,11 @@ export class ProductsController {
     return this.productService.getAllProducts(searchText);
   }
 
+  @Get("/allPaginated")
+  async getAllPaginatedProducts(@Query('searchText') searchText, @Query('page') page, @Query('rows') rows): Promise<Product[]> {
+    return this.productService.getAllPaginatedProducts(searchText, +page, +rows);
+  }
+
   @Get("/:id")
   async getProductById(@Param('id') id: string): Promise<Product> {
     return this.productService.getProductById(+id);

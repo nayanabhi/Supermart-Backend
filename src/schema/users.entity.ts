@@ -40,6 +40,6 @@ export class User {
   @Column()
   zipcode: string;
 
-  @Column('jsonb', { nullable: true })
-  roles: string[]; // Optional property for roles
+  @Column({ nullable: true })
+  roles: string; // Optional property for roles
 }

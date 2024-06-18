@@ -15,7 +15,7 @@ export class AuthService {
   async authenticateUser(validateUser: ValidateUser): Promise<string | null> {
     try { 
       const user = await this.validateUser(validateUser);
-      const tokenPayload = { username: user.username, sub: user.id };
+      const tokenPayload = { username: user.username, sub: user.id, role: user.roles };
       return await this.jwtService.signAsync(tokenPayload,  {secret: process.env.JWT_SECRET, expiresIn: +process.env.EXPIRY_TIME});
     } catch(error) {
       throw new HttpException(error?.message, error?.status);
